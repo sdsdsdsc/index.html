@@ -4,9 +4,12 @@ import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.c
 
 // Your Firebase config (replace with yours)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
+  apiKey: "AIzaSyBLSzjsQ26_yFu7H1ix6j8R4tY7uqpARDw",
+  authDomain: "alex-photo-board.firebaseapp.com",
+  projectId: "alex-photo-board",
+  storageBucket: "alex-photo-board.appspot.com",
+  messagingSenderId: "1092938868533",
+  appId: "1:1092938868533:web:7dfa0a832310c2d30d8e7c"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
