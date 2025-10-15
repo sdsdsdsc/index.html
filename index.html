@@ -1,40 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alex's Web</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
-      text-align: center;
-      margin-top: 100px;
-    }
-    h1 {
-      color: #333;
-    }
-    p {
-      color: #555;
-      font-size: 18px;
-    }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #222;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #444;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alex's Photo Board</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <h1>Hey there 👋 I'm Alex</h1>
-  <p>Welcome to my first GitHub web page!</p>
-  <button onclick="alert('Nancy says: you did it! 🎉')">Click me</button>
+  <h1>📸 Alex's Photo Board</h1>
+  <input type="file" id="fileInput">
+  <input type="text" id="msgInput" placeholder="Leave a message">
+  <button id="uploadBtn">Upload</button>
+  <h2>Gallery</h2>
+  <div id="gallery"></div>
 </body>
 </html>
