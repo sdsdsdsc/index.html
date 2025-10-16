@@ -38,17 +38,23 @@ async function uploadImage(file) {
 // Upload button event
 uploadBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
-  const msg = msgInput.value.trim();
-  if (!file || !msg) return alert("Pick a file and type a message!");
+const name = nameInput.value.trim() || "Anonymous";
+const msg = msgInput.value.trim();
 
-  try {
-    const imageUrl = await uploadImage(file);
-    await addDoc(collection(db, "posts"), { message: msg, imageUrl });
+if (!file || !msg) return alert("Please pick a file and type a message!");
 
-    fileInput.value = "";
-    msgInput.value = "";
-    alert("Uploaded!");
-    loadGallery();
+const imageUrl = await uploadImage(file);
+await addDoc(collection(db, "posts"), {
+  name: name,
+  message: msg,
+  imageUrl: imageUrl
+});
+
+fileInput.value = "";
+msgInput.value = "";
+nameInput.value = "";
+alert("Uploaded!");
+loadGallery();
   } catch (err) {
     console.error("Upload error:", err);
     alert("Something went wrong.");
@@ -72,13 +78,16 @@ async function loadGallery() {
   img.alt = data.message;
 
   // Caption (message text)
-  const caption = document.createElement("p");
-  caption.textContent = data.message || "No message";
+ const username = document.createElement("h4");
+username.textContent = data.name || "Anonymous";
+
+const caption = document.createElement("p");
+caption.textContent = data.message || "";
 
   // Put them together
   item.appendChild(img);
-  item.appendChild(caption);
-  gallery.appendChild(item);
+item.appendChild(username);
+item.appendChild(caption);
 });
 
 }
