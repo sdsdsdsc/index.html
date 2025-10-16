@@ -4,12 +4,12 @@ import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.c
 
 // Your Firebase config (replace with yours)
 const firebaseConfig = {
-  apiKey: "AIzaSyBLSzjsQ26_yFu7H1ix6j8R4tY7uqpARDw",
+  apiKey: "AIzaSyBSlzsjq26_yFu7Hi1x6j8R4Yt7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
   projectId: "alex-photo-board",
-  storageBucket: "alex-photo-board.appspot.com",
+  storageBucket: "alex-photo-board.firebasestorage.app",
   messagingSenderId: "1092938868533",
-  appId: "1:1092938868533:web:7dfa0a832310c2d30d8e7c"
+  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c"
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -69,48 +69,3 @@ async function loadGallery() {
 }
 
 loadGallery();
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-async function loadPosts() {
-  const postsRef = collection(db, "posts");
-  const snapshot = await getDocs(postsRef);
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = ""; // Clear old stuff
-
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-
-    // Create container for each post
-    const container = document.createElement("div");
-    container.className = "post";
-
-    // Create image
-    const img = document.createElement("img");
-    img.src = data.imageUrl;
-    img.alt = data.message;
-    img.style.width = "200px";
-    img.style.display = "block";
-    img.style.marginBottom = "8px";
-
-    // Create message text
-    const p = document.createElement("p");
-    p.textContent = data.message;
-
-    // Add to container
-    container.appendChild(img);
-    container.appendChild(p);
-
-    // Add to gallery
-    gallery.appendChild(container);
-  });
-}
-
-// 🔥 Load all posts when page opens
-window.addEventListener("load", loadPosts);
-await addDoc(collection(db, "posts"), {
-  imageUrl: imageUrl,
-  message: message
-});
-
-// call this to refresh the gallery
-loadPosts();
