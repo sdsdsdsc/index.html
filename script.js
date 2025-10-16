@@ -1,6 +1,6 @@
 // ---------------- Firebase ----------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // Your Firebase config
 const firebaseConfig = {
@@ -22,7 +22,7 @@ const uploadPreset = "unsigned_upload"; // your preset name
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 const msgInput = document.getElementById("msgInput");
-const nameInput = document.getElementById("nameInput"); // ✅ added
+const nameInput = document.getElementById("nameInput");
 const gallery = document.getElementById("gallery");
 
 // ---------------- Upload to Cloudinary ----------------
@@ -53,7 +53,8 @@ uploadBtn.addEventListener("click", async () => {
     await addDoc(collection(db, "posts"), {
       name: name,
       message: msg,
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
+      createdAt: serverTimestamp() // ✅ Add timestamp
     });
 
     fileInput.value = "";
@@ -91,11 +92,22 @@ async function loadGallery() {
     const caption = document.createElement("p");
     caption.textContent = data.message || "";
 
+    // Timestamp
+    const time = document.createElement("p");
+    if (data.createdAt && data.createdAt.toDate) {
+      const date = data.createdAt.toDate();
+      time.textContent = `🕓 Posted on ${date.toLocaleString()}`;
+      time.classList.add("time");
+    } else {
+      time.textContent = "";
+    }
+
     // Combine elements
     item.appendChild(img);
     item.appendChild(username);
     item.appendChild(caption);
-    gallery.appendChild(item); // ✅ fixed missing append
+    item.appendChild(time);
+    gallery.appendChild(item);
   });
 }
 
