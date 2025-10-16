@@ -59,21 +59,28 @@ uploadBtn.addEventListener("click", async () => {
 async function loadGallery() {
   gallery.innerHTML = "";
   const snapshot = await getDocs(collection(db, "posts"));
-  snapshot.forEach(doc => {
-    const data = doc.data();
-  const container = document.createElement("div");
-container.classList.add("item");
+ snapshot.forEach(doc => {
+  const data = doc.data();
 
-const img = document.createElement("img");
-img.src = data.imageUrl;
+  // Create a container for each post
+  const item = document.createElement("div");
+  item.classList.add("item");
 
-const caption = document.createElement("p");
-caption.textContent = data.message;
+  // Image element
+  const img = document.createElement("img");
+  img.src = data.imageUrl;
+  img.alt = data.message;
 
-container.appendChild(img);
-container.appendChild(caption);
-gallery.appendChild(container);
-  });
+  // Caption (message text)
+  const caption = document.createElement("p");
+  caption.textContent = data.message || "No message";
+
+  // Put them together
+  item.appendChild(img);
+  item.appendChild(caption);
+  gallery.appendChild(item);
+});
+
 }
 
 loadGallery();
