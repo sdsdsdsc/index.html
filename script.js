@@ -22,6 +22,7 @@ const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 const msgInput = document.getElementById("msgInput");
 const gallery = document.getElementById("gallery");
+const nameInput = document.getElementById("nameInput");
 
 // Upload image to Cloudinary
 async function uploadImage(file) {
@@ -38,28 +39,30 @@ async function uploadImage(file) {
 // Upload button event
 uploadBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
-const name = nameInput.value.trim() || "Anonymous";
-const msg = msgInput.value.trim();
+  const name = nameInput.value.trim() || "Anonymous";
+  const msg = msgInput.value.trim();
 
-if (!file || !msg) return alert("Please pick a file and type a message!");
+  if (!file || !msg) return alert("Please pick a file and type a message!");
 
-const imageUrl = await uploadImage(file);
-await addDoc(collection(db, "posts"), {
-  name: name,
-  message: msg,
-  imageUrl: imageUrl
-});
+  try {
+    const imageUrl = await uploadImage(file);
+    await addDoc(collection(db, "posts"), {
+      name: name,
+      message: msg,
+      imageUrl: imageUrl
+    });
 
-fileInput.value = "";
-msgInput.value = "";
-nameInput.value = "";
-alert("Uploaded!");
-loadGallery();
+    fileInput.value = "";
+    msgInput.value = "";
+    nameInput.value = "";
+    alert("Uploaded!");
+    loadGallery();
   } catch (err) {
     console.error("Upload error:", err);
     alert("Something went wrong.");
   }
 });
+
 
 // Load gallery from Firestore
 async function loadGallery() {
@@ -88,6 +91,7 @@ caption.textContent = data.message || "";
   item.appendChild(img);
 item.appendChild(username);
 item.appendChild(caption);
+gallery.appendChild(item);
 });
 
 }
