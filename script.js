@@ -1,8 +1,8 @@
-// ---------------- Firebase ----------------
+// ---------------- Firebase Setup ----------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-// Your Firebase config (replace with yours)
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBLSzjsQ26_yFu7H1ix6j8R4tY7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
@@ -11,106 +11,102 @@ const firebaseConfig = {
   messagingSenderId: "1092938868533",
   appId: "1:1092938868533:web:7dfa0a832310c2d30d8e7c"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ---------------- Cloudinary ----------------
+// ---------------- Cloudinary Setup ----------------
 const cloudName = "dburezmgp"; // your Cloudinary cloud name
-const uploadPreset = "unsigned_upload"; // your preset name
+const uploadPreset = "unsigned_upload"; // your unsigned preset name
 
+// ---------------- DOM References ----------------
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 const msgInput = document.getElementById("msgInput");
 const gallery = document.getElementById("gallery");
 
-// Upload image to Cloudinary
+// ---------------- Upload to Cloudinary ----------------
 async function uploadImage(file) {
-  const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", uploadPreset);
 
   const res = await fetch(url, { method: "POST", body: formData });
   const data = await res.json();
-  return data.secure_url; // return uploaded image URL
+
+  if (!data.secure_url) throw new Error("Cloudinary upload failed");
+  return data.secure_url;
 }
 
-// Upload button event
+// ---------------- Upload + Save to Firebase ----------------
 uploadBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
-  const msg = msgInput.value.trim();
-  if (!file || !msg) return alert("Pick a file and type a message!");
+  const message = msgInput.value.trim();
+
+  if (!file || !message) {
+    alert("Please select a file and write a message!");
+    return;
+  }
 
   try {
-    const imageUrl = await uploadImage(file);
-    await addDoc(collection(db, "posts"), { message: msg, imageUrl });
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = "Uploading...";
 
+    const imageUrl = await uploadImage(file);
+    await addDoc(collection(db, "posts"), { imageUrl, message });
+
+    alert("✅ Upload successful!");
     fileInput.value = "";
     msgInput.value = "";
-    alert("Uploaded!");
-    loadGallery();
+    await loadPosts(); // Refresh posts
+
   } catch (err) {
     console.error("Upload error:", err);
-    alert("Something went wrong.");
+    alert("❌ Something went wrong. Check console for details.");
+  } finally {
+    uploadBtn.disabled = false;
+    uploadBtn.textContent = "Upload";
   }
 });
 
-// Load gallery from Firestore
-async function loadGallery() {
-  gallery.innerHTML = "";
-  const snapshot = await getDocs(collection(db, "posts"));
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const img = document.createElement("img");
-    img.src = data.imageUrl;
-    img.title = data.message;
-    gallery.appendChild(img);
-  });
-}
-
-loadGallery();
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
+// ---------------- Load Posts from Firebase ----------------
 async function loadPosts() {
-  const postsRef = collection(db, "posts");
-  const snapshot = await getDocs(postsRef);
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = ""; // Clear old stuff
+  gallery.innerHTML = ""; // Clear previous content
 
+  const snapshot = await getDocs(collection(db, "posts"));
   snapshot.forEach((doc) => {
     const data = doc.data();
 
-    // Create container for each post
-    const container = document.createElement("div");
-    container.className = "post";
+    // Create container
+    const postDiv = document.createElement("div");
+    postDiv.className = "post";
+    postDiv.style.display = "inline-block";
+    postDiv.style.margin = "15px";
+    postDiv.style.textAlign = "center";
 
     // Create image
     const img = document.createElement("img");
     img.src = data.imageUrl;
-    img.alt = data.message;
-    img.style.width = "200px";
-    img.style.display = "block";
-    img.style.marginBottom = "8px";
+    img.alt = data.message || "Photo";
+    img.style.width = "250px";
+    img.style.borderRadius = "10px";
+    img.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
 
-    // Create message text
-    const p = document.createElement("p");
-    p.textContent = data.message;
+    // Create message
+    const caption = document.createElement("p");
+    caption.textContent = data.message || "(No comment)";
+    caption.style.fontFamily = "sans-serif";
+    caption.style.marginTop = "8px";
+    caption.style.fontSize = "14px";
+    caption.style.color = "#333";
 
-    // Add to container
-    container.appendChild(img);
-    container.appendChild(p);
-
-    // Add to gallery
-    gallery.appendChild(container);
+    // Append to gallery
+    postDiv.appendChild(img);
+    postDiv.appendChild(caption);
+    gallery.appendChild(postDiv);
   });
 }
 
-// 🔥 Load all posts when page opens
+// ---------------- Load Posts on Page Load ----------------
 window.addEventListener("load", loadPosts);
-await addDoc(collection(db, "posts"), {
-  imageUrl: imageUrl,
-  message: message
-});
-
-// call this to refresh the gallery
-loadPosts();
