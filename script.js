@@ -69,3 +69,48 @@ async function loadGallery() {
 }
 
 loadGallery();
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+async function loadPosts() {
+  const postsRef = collection(db, "posts");
+  const snapshot = await getDocs(postsRef);
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = ""; // Clear old stuff
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+
+    // Create container for each post
+    const container = document.createElement("div");
+    container.className = "post";
+
+    // Create image
+    const img = document.createElement("img");
+    img.src = data.imageUrl;
+    img.alt = data.message;
+    img.style.width = "200px";
+    img.style.display = "block";
+    img.style.marginBottom = "8px";
+
+    // Create message text
+    const p = document.createElement("p");
+    p.textContent = data.message;
+
+    // Add to container
+    container.appendChild(img);
+    container.appendChild(p);
+
+    // Add to gallery
+    gallery.appendChild(container);
+  });
+}
+
+// 🔥 Load all posts when page opens
+window.addEventListener("load", loadPosts);
+await addDoc(collection(db, "posts"), {
+  imageUrl: imageUrl,
+  message: message
+});
+
+// call this to refresh the gallery
+loadPosts();
