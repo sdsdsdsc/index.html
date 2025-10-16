@@ -15,3 +15,20 @@ body {
   margin: 10px;
   border-radius: 8px;
 }
+.item {
+  margin: 10px;
+  text-align: center;
+}
+
+.item img {
+  width: 200px;
+  border-radius: 8px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.item p {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+}

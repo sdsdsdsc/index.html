@@ -61,10 +61,18 @@ async function loadGallery() {
   const snapshot = await getDocs(collection(db, "posts"));
   snapshot.forEach(doc => {
     const data = doc.data();
-    const img = document.createElement("img");
-    img.src = data.imageUrl;
-    img.title = data.message;
-    gallery.appendChild(img);
+  const container = document.createElement("div");
+container.classList.add("item");
+
+const img = document.createElement("img");
+img.src = data.imageUrl;
+
+const caption = document.createElement("p");
+caption.textContent = data.message;
+
+container.appendChild(img);
+container.appendChild(caption);
+gallery.appendChild(container);
   });
 }
 
