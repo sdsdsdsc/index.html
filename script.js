@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-// Your Firebase config (replace with yours)
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBSlzsjq26_yFu7Hi1x6j8R4Yt7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
@@ -18,13 +18,14 @@ const db = getFirestore(app);
 const cloudName = "dburezmgp"; // your Cloudinary cloud name
 const uploadPreset = "unsigned_upload"; // your preset name
 
+// ---------------- Elements ----------------
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 const msgInput = document.getElementById("msgInput");
+const nameInput = document.getElementById("nameInput"); // ✅ added missing variable
 const gallery = document.getElementById("gallery");
-const nameInput = document.getElementById("nameInput");
 
-// Upload image to Cloudinary
+// ---------------- Upload to Cloudinary ----------------
 async function uploadImage(file) {
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
   const formData = new FormData();
@@ -36,7 +37,7 @@ async function uploadImage(file) {
   return data.secure_url; // return uploaded image URL
 }
 
-// Upload button event
+// ---------------- Upload Button Event ----------------
 uploadBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
   const name = nameInput.value.trim() || "Anonymous";
@@ -63,37 +64,37 @@ uploadBtn.addEventListener("click", async () => {
   }
 });
 
-
-// Load gallery from Firestore
+// ---------------- Load Gallery from Firestore ----------------
 async function loadGallery() {
   gallery.innerHTML = "";
   const snapshot = await getDocs(collection(db, "posts"));
- snapshot.forEach(doc => {
-  const data = doc.data();
+  snapshot.forEach(doc => {
+    const data = doc.data();
 
-  // Create a container for each post
-  const item = document.createElement("div");
-  item.classList.add("item");
+    // Create container for each post
+    const item = document.createElement("div");
+    item.classList.add("item");
 
-  // Image element
-  const img = document.createElement("img");
-  img.src = data.imageUrl;
-  img.alt = data.message;
+    // Image
+    const img = document.createElement("img");
+    img.src = data.imageUrl;
+    img.alt = data.message;
 
-  // Caption (message text)
- const username = document.createElement("h4");
-username.textContent = data.name || "Anonymous";
+    // Username
+    const username = document.createElement("h4");
+    username.textContent = data.name || "Anonymous";
 
-const caption = document.createElement("p");
-caption.textContent = data.message || "";
+    // Message caption
+    const caption = document.createElement("p");
+    caption.textContent = data.message || "";
 
-  // Put them together
-  item.appendChild(img);
-item.appendChild(username);
-item.appendChild(caption);
-gallery.appendChild(item);
-});
-
+    // Combine elements
+    item.appendChild(img);
+    item.appendChild(username);
+    item.appendChild(caption);
+    gallery.appendChild(item); // ✅ ensure it’s added to gallery
+  });
 }
 
+// ---------------- Initialize ----------------
 loadGallery();
