@@ -52,3 +52,38 @@ body {
   font-style: italic;
 }
 
+.like-btn,
+.comment-btn {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  margin: 6px 4px;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+.like-btn:hover {
+  background: #ff1a1a;
+}
+
+.comment-box {
+  padding: 6px;
+  width: 180px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.comment-list {
+  margin-top: 8px;
+  text-align: left;
+  font-size: 14px;
+  color: #444;
+}
+
+.comment-list p {
+  margin: 2px 0;
+}
+

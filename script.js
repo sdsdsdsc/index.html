@@ -1,6 +1,14 @@
 // ---------------- Firebase ----------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  serverTimestamp,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // Your Firebase config
 const firebaseConfig = {
@@ -9,7 +17,7 @@ const firebaseConfig = {
   projectId: "alex-photo-board",
   storageBucket: "alex-photo-board.firebasestorage.app",
   messagingSenderId: "1092938868533",
-  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c"
+  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c",
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -54,7 +62,8 @@ uploadBtn.addEventListener("click", async () => {
       name: name,
       message: msg,
       imageUrl: imageUrl,
-      createdAt: serverTimestamp() // ✅ Add timestamp
+      likes: 0,
+      createdAt: serverTimestamp(), // ✅ Add timestamp
     });
 
     fileInput.value = "";
@@ -72,8 +81,10 @@ uploadBtn.addEventListener("click", async () => {
 async function loadGallery() {
   gallery.innerHTML = "";
   const snapshot = await getDocs(collection(db, "posts"));
-  snapshot.forEach(doc => {
-    const data = doc.data();
+
+  for (const docSnap of snapshot.docs) {
+    const data = docSnap.data();
+    const postId = docSnap.id;
 
     // Create container for each post
     const item = document.createElement("div");
@@ -102,13 +113,71 @@ async function loadGallery() {
       time.textContent = "";
     }
 
-    // Combine elements
+    // ❤️ Like button
+    const likeBtn = document.createElement("button");
+    likeBtn.textContent = `❤️ ${data.likes || 0}`;
+    likeBtn.classList.add("like-btn");
+
+    likeBtn.addEventListener("click", async () => {
+      const postRef = doc(db, "posts", postId);
+      const newLikes = (data.likes || 0) + 1;
+      await updateDoc(postRef, { likes: newLikes });
+      data.likes = newLikes; // update local data too
+      likeBtn.textContent = `❤️ ${newLikes}`;
+    });
+
+    // 💬 Comment box + button
+    const commentBox = document.createElement("input");
+    commentBox.placeholder = "Add a comment...";
+    commentBox.classList.add("comment-box");
+
+    const commentBtn = document.createElement("button");
+    commentBtn.textContent = "Post";
+    commentBtn.classList.add("comment-btn");
+
+    // 💭 Comment list container
+    const commentList = document.createElement("div");
+    commentList.classList.add("comment-list");
+
+    // Load existing comments
+    const commentsRef = collection(db, "posts", postId, "comments");
+    const commentsSnap = await getDocs(commentsRef);
+    commentsSnap.forEach((c) => {
+      const cData = c.data();
+      const p = document.createElement("p");
+      p.textContent = `${cData.author || "Anonymous"}: ${cData.text}`;
+      commentList.appendChild(p);
+    });
+
+    // Comment button functionality
+    commentBtn.addEventListener("click", async () => {
+      const comment = commentBox.value.trim();
+      if (!comment) return alert("Type a comment first!");
+
+      await addDoc(collection(db, "posts", postId, "comments"), {
+        text: comment,
+        author: "Anonymous",
+        createdAt: serverTimestamp(),
+      });
+
+      const p = document.createElement("p");
+      p.textContent = `Anonymous: ${comment}`;
+      commentList.appendChild(p);
+      commentBox.value = "";
+    });
+
+    // Combine everything
     item.appendChild(img);
     item.appendChild(username);
     item.appendChild(caption);
     item.appendChild(time);
+    item.appendChild(likeBtn);
+    item.appendChild(commentBox);
+    item.appendChild(commentBtn);
+    item.appendChild(commentList);
+
     gallery.appendChild(item);
-  });
+  }
 }
 
 // ---------------- Initialize ----------------
