@@ -34,12 +34,18 @@ const msgInput = document.getElementById("msgInput");
 const nameInput = document.getElementById("nameInput");
 const gallery = document.getElementById("gallery");
 
-// ---------------- Modal Elements ----------------
+// Modal elements
 const modal = document.getElementById("postModal");
 const modalBody = document.getElementById("modalBody");
 const closeBtn = document.querySelector(".close");
 
-// ---------------- Upload to Cloudinary ----------------
+// Menu elements
+const photoMenu = document.getElementById("photoMenu");
+const newsMenu = document.getElementById("newsMenu");
+const photoSection = document.getElementById("photoSection");
+const newsSection = document.getElementById("newsSection");
+
+// ---------------- Upload Image ----------------
 async function uploadImage(file) {
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
   const formData = new FormData();
@@ -50,7 +56,7 @@ async function uploadImage(file) {
   return data.secure_url;
 }
 
-// ---------------- Upload Button ----------------
+// ---------------- Upload Photo ----------------
 uploadBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
   const name = nameInput.value.trim() || "Anonymous";
@@ -77,7 +83,7 @@ uploadBtn.addEventListener("click", async () => {
   }
 });
 
-// ---------------- Load Gallery ----------------
+// ---------------- Load Photo Gallery ----------------
 async function loadGallery() {
   gallery.innerHTML = "";
   const snapshot = await getDocs(collection(db, "posts"));
@@ -112,7 +118,7 @@ async function loadGallery() {
   }
 }
 
-// ---------------- Modal Logic ----------------
+// ---------------- Open Modal ----------------
 async function openModal(postId) {
   modal.style.display = "block";
   modalBody.innerHTML = "";
@@ -121,19 +127,16 @@ async function openModal(postId) {
   const postSnap = await getDoc(postRef);
   const data = postSnap.data();
 
-  // Image
   const img = document.createElement("img");
   img.src = data.imageUrl;
   img.classList.add("modal-image");
 
-  // Username & message
   const name = document.createElement("h3");
   name.textContent = data.name || "Anonymous";
 
   const msg = document.createElement("p");
   msg.textContent = data.message || "";
 
-  // Timestamp
   const time = document.createElement("p");
   if (data.createdAt && data.createdAt.toDate) {
     const date = data.createdAt.toDate();
@@ -141,7 +144,6 @@ async function openModal(postId) {
     time.classList.add("time");
   }
 
-  // ❤️ Like button
   const likeBtn = document.createElement("button");
   likeBtn.textContent = `❤️ ${data.likes || 0}`;
   likeBtn.classList.add("like-btn");
@@ -152,7 +154,6 @@ async function openModal(postId) {
     likeBtn.textContent = `❤️ ${newLikes}`;
   });
 
-  // 💬 Comments
   const commentBox = document.createElement("input");
   commentBox.placeholder = "Add a comment...";
   commentBox.classList.add("comment-box");
@@ -197,11 +198,71 @@ async function openModal(postId) {
   modalBody.appendChild(commentList);
 }
 
-// Close modal when “x” clicked or outside area
+// Close modal
 closeBtn.onclick = () => (modal.style.display = "none");
 window.onclick = e => {
   if (e.target === modal) modal.style.display = "none";
 };
 
-// ---------------- Init ----------------
+// ---------------- Load News Section ----------------
+async function loadNews() {
+  const container = document.getElementById("newsContainer");
+  container.innerHTML = "";
+  const snapshot = await getDocs(collection(db, "news"));
+
+  snapshot.forEach(docSnap => {
+    const data = docSnap.data();
+
+    const item = document.createElement("div");
+    item.classList.add("news-item");
+
+    const title = document.createElement("h3");
+    title.textContent = data.title;
+
+    const content = document.createElement("p");
+    content.textContent = data.content;
+
+    const time = document.createElement("p");
+    if (data.createdAt && data.createdAt.toDate) {
+      const date = data.createdAt.toDate();
+      time.textContent = `🕓 Posted on ${date.toLocaleString()}`;
+      time.classList.add("time");
+    }
+
+    const likeBtn = document.createElement("button");
+    likeBtn.textContent = `👍 ${data.likes || 0}`;
+    likeBtn.classList.add("like-btn");
+    likeBtn.addEventListener("click", async () => {
+      const postRef = doc(db, "news", docSnap.id);
+      const newLikes = (data.likes || 0) + 1;
+      await updateDoc(postRef, { likes: newLikes });
+      data.likes = newLikes;
+      likeBtn.textContent = `👍 ${newLikes}`;
+    });
+
+    item.appendChild(title);
+    item.appendChild(content);
+    item.appendChild(time);
+    item.appendChild(likeBtn);
+    container.appendChild(item);
+  });
+}
+
+// ---------------- Menu Switching ----------------
+photoMenu.addEventListener("click", () => {
+  photoSection.style.display = "block";
+  newsSection.style.display = "none";
+  photoMenu.classList.add("active");
+  newsMenu.classList.remove("active");
+});
+
+newsMenu.addEventListener("click", () => {
+  photoSection.style.display = "none";
+  newsSection.style.display = "block";
+  newsMenu.classList.add("active");
+  photoMenu.classList.remove("active");
+  loadNews();
+});
+
+// ---------------- Initialize ----------------
 loadGallery();
