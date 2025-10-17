@@ -9,12 +9,23 @@
 </head>
 <body>
   <h1>📸 Alex's Photo Board</h1>
-  <input type="file" id="fileInput">
-  <input type="text" id="nameInput" placeholder="Your name">
-  <input type="text" id="msgInput" placeholder="Leave a message">
-  <button id="uploadBtn">Upload</button>
+
+  <div class="upload-container">
+    <input type="file" id="fileInput">
+    <input type="text" id="nameInput" placeholder="Your name">
+    <input type="text" id="msgInput" placeholder="Leave a message">
+    <button id="uploadBtn">Upload</button>
+  </div>
 
   <h2>Gallery</h2>
   <div id="gallery"></div>
+
+  <!-- Modal (hidden by default) -->
+  <div id="postModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
 </body>
 </html>
