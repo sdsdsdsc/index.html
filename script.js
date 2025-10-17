@@ -7,7 +7,8 @@ import {
   getDocs,
   serverTimestamp,
   doc,
-  updateDoc
+  updateDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 // Firebase config
@@ -17,7 +18,7 @@ const firebaseConfig = {
   projectId: "alex-photo-board",
   storageBucket: "alex-photo-board.firebasestorage.app",
   messagingSenderId: "1092938868533",
-  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c"
+  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c",
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -101,7 +102,7 @@ async function loadGallery() {
     const viewBtn = document.createElement("button");
     viewBtn.textContent = "View Details";
     viewBtn.classList.add("view-btn");
-    viewBtn.addEventListener("click", () => openModal(postId, data));
+    viewBtn.addEventListener("click", () => openModal(postId));
 
     item.appendChild(img);
     item.appendChild(username);
@@ -112,19 +113,27 @@ async function loadGallery() {
 }
 
 // ---------------- Modal Logic ----------------
-async function openModal(postId, data) {
+async function openModal(postId) {
   modal.style.display = "block";
   modalBody.innerHTML = "";
 
+  const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  const data = postSnap.data();
+
+  // Image
   const img = document.createElement("img");
   img.src = data.imageUrl;
+  img.classList.add("modal-image");
 
+  // Username & message
   const name = document.createElement("h3");
   name.textContent = data.name || "Anonymous";
 
   const msg = document.createElement("p");
   msg.textContent = data.message || "";
 
+  // Timestamp
   const time = document.createElement("p");
   if (data.createdAt && data.createdAt.toDate) {
     const date = data.createdAt.toDate();
@@ -138,12 +147,12 @@ async function openModal(postId, data) {
   likeBtn.classList.add("like-btn");
   likeBtn.addEventListener("click", async () => {
     const newLikes = (data.likes || 0) + 1;
-    await updateDoc(doc(db, "posts", postId), { likes: newLikes });
+    await updateDoc(postRef, { likes: newLikes });
     data.likes = newLikes;
     likeBtn.textContent = `❤️ ${newLikes}`;
   });
 
-  // 💬 Comment section
+  // 💬 Comments
   const commentBox = document.createElement("input");
   commentBox.placeholder = "Add a comment...";
   commentBox.classList.add("comment-box");
@@ -188,6 +197,7 @@ async function openModal(postId, data) {
   modalBody.appendChild(commentList);
 }
 
+// Close modal when “x” clicked or outside area
 closeBtn.onclick = () => (modal.style.display = "none");
 window.onclick = e => {
   if (e.target === modal) modal.style.display = "none";
