@@ -1,4 +1,3 @@
-// ---------------- Firebase ----------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import {
   getFirestore,
@@ -11,42 +10,30 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBSlzsjq26_yFu7Hi1x6j8R4Yt7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
   projectId: "alex-photo-board",
-  storageBucket: "alex-photo-board.firebasestorage.app",
+  storageBucket: "alex-photo-board.appspot.com",
   messagingSenderId: "1092938868533",
   appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c",
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ---------------- Cloudinary ----------------
-const cloudName = "dburezmgp";
-const uploadPreset = "unsigned_upload";
-
-// ---------------- Elements ----------------
+// ========== PHOTO UPLOAD ==========
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 const msgInput = document.getElementById("msgInput");
 const nameInput = document.getElementById("nameInput");
 const gallery = document.getElementById("gallery");
-
-// Modal elements
 const modal = document.getElementById("postModal");
 const modalBody = document.getElementById("modalBody");
 const closeBtn = document.querySelector(".close");
 
-// Menu elements
-const photoMenu = document.getElementById("photoMenu");
-const newsMenu = document.getElementById("newsMenu");
-const photoSection = document.getElementById("photoSection");
-const newsSection = document.getElementById("newsSection");
-
-// ---------------- Upload Image ----------------
 async function uploadImage(file) {
+  const cloudName = "dburezmgp";
+  const uploadPreset = "unsigned_upload";
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
   const formData = new FormData();
   formData.append("file", file);
@@ -56,12 +43,11 @@ async function uploadImage(file) {
   return data.secure_url;
 }
 
-// ---------------- Upload Photo ----------------
 uploadBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
   const name = nameInput.value.trim() || "Anonymous";
   const msg = msgInput.value.trim();
-  if (!file || !msg) return alert("Please pick a file and type a message!");
+  if (!file || !msg) return alert("Please choose a file and write a message!");
 
   try {
     const imageUrl = await uploadImage(file);
@@ -79,29 +65,23 @@ uploadBtn.addEventListener("click", async () => {
     loadGallery();
   } catch (err) {
     console.error("Upload error:", err);
-    alert("Something went wrong.");
   }
 });
 
-// ---------------- Load Photo Gallery ----------------
 async function loadGallery() {
   gallery.innerHTML = "";
   const snapshot = await getDocs(collection(db, "posts"));
-
   for (const docSnap of snapshot.docs) {
     const data = docSnap.data();
     const postId = docSnap.id;
-
     const item = document.createElement("div");
     item.classList.add("item");
 
     const img = document.createElement("img");
     img.src = data.imageUrl;
     img.alt = data.message;
-
     const username = document.createElement("h4");
     username.textContent = data.name || "Anonymous";
-
     const caption = document.createElement("p");
     caption.textContent = data.message || "";
 
@@ -118,11 +98,9 @@ async function loadGallery() {
   }
 }
 
-// ---------------- Open Modal ----------------
 async function openModal(postId) {
   modal.style.display = "block";
   modalBody.innerHTML = "";
-
   const postRef = doc(db, "posts", postId);
   const postSnap = await getDoc(postRef);
   const data = postSnap.data();
@@ -130,12 +108,10 @@ async function openModal(postId) {
   const img = document.createElement("img");
   img.src = data.imageUrl;
   img.classList.add("modal-image");
-
   const name = document.createElement("h3");
-  name.textContent = data.name || "Anonymous";
-
+  name.textContent = data.name;
   const msg = document.createElement("p");
-  msg.textContent = data.message || "";
+  msg.textContent = data.message;
 
   const time = document.createElement("p");
   if (data.createdAt && data.createdAt.toDate) {
@@ -154,78 +130,43 @@ async function openModal(postId) {
     likeBtn.textContent = `❤️ ${newLikes}`;
   });
 
-  const commentBox = document.createElement("input");
-  commentBox.placeholder = "Add a comment...";
-  commentBox.classList.add("comment-box");
-
-  const commentBtn = document.createElement("button");
-  commentBtn.textContent = "Post";
-  commentBtn.classList.add("comment-btn");
-
-  const commentList = document.createElement("div");
-  commentList.classList.add("comment-list");
-
-  const commentsRef = collection(db, "posts", postId, "comments");
-  const commentsSnap = await getDocs(commentsRef);
-  commentsSnap.forEach(c => {
-    const cData = c.data();
-    const p = document.createElement("p");
-    p.textContent = `${cData.author || "Anonymous"}: ${cData.text}`;
-    commentList.appendChild(p);
-  });
-
-  commentBtn.addEventListener("click", async () => {
-    const text = commentBox.value.trim();
-    if (!text) return alert("Type a comment!");
-    await addDoc(commentsRef, {
-      text,
-      author: "Anonymous",
-      createdAt: serverTimestamp()
-    });
-    const p = document.createElement("p");
-    p.textContent = `Anonymous: ${text}`;
-    commentList.appendChild(p);
-    commentBox.value = "";
-  });
-
   modalBody.appendChild(img);
   modalBody.appendChild(name);
   modalBody.appendChild(msg);
   modalBody.appendChild(time);
   modalBody.appendChild(likeBtn);
-  modalBody.appendChild(commentBox);
-  modalBody.appendChild(commentBtn);
-  modalBody.appendChild(commentList);
 }
 
-// Close modal
 closeBtn.onclick = () => (modal.style.display = "none");
-window.onclick = e => {
-  if (e.target === modal) modal.style.display = "none";
-};
+window.onclick = e => { if (e.target === modal) modal.style.display = "none"; };
 
-// ---------------- Load News Section ----------------
+// ========== NEWS ==========
 async function loadNews() {
   const container = document.getElementById("newsContainer");
   container.innerHTML = "";
   const snapshot = await getDocs(collection(db, "news"));
-
   snapshot.forEach(docSnap => {
     const data = docSnap.data();
-
+    const id = docSnap.id;
     const item = document.createElement("div");
-    item.classList.add("news-item");
+    item.classList.add("news-card");
 
     const title = document.createElement("h3");
     title.textContent = data.title;
+    title.classList.add("news-title");
+    title.addEventListener("click", () => {
+      window.location.href = `article.html?id=${id}`;
+    });
 
-    const content = document.createElement("p");
-    content.textContent = data.content;
+    const img = document.createElement("img");
+    img.src = data.imageUrl;
+    img.alt = data.title;
+    img.classList.add("news-thumb");
 
     const time = document.createElement("p");
     if (data.createdAt && data.createdAt.toDate) {
       const date = data.createdAt.toDate();
-      time.textContent = `🕓 Posted on ${date.toLocaleString()}`;
+      time.textContent = `🕓 ${date.toLocaleString()}`;
       time.classList.add("time");
     }
 
@@ -233,7 +174,7 @@ async function loadNews() {
     likeBtn.textContent = `👍 ${data.likes || 0}`;
     likeBtn.classList.add("like-btn");
     likeBtn.addEventListener("click", async () => {
-      const postRef = doc(db, "news", docSnap.id);
+      const postRef = doc(db, "news", id);
       const newLikes = (data.likes || 0) + 1;
       await updateDoc(postRef, { likes: newLikes });
       data.likes = newLikes;
@@ -241,21 +182,25 @@ async function loadNews() {
     });
 
     item.appendChild(title);
-    item.appendChild(content);
+    item.appendChild(img);
     item.appendChild(time);
     item.appendChild(likeBtn);
     container.appendChild(item);
   });
 }
 
-// ---------------- Menu Switching ----------------
+// ========== MENU ==========
+const photoMenu = document.getElementById("photoMenu");
+const newsMenu = document.getElementById("newsMenu");
+const photoSection = document.getElementById("photoSection");
+const newsSection = document.getElementById("newsSection");
+
 photoMenu.addEventListener("click", () => {
   photoSection.style.display = "block";
   newsSection.style.display = "none";
   photoMenu.classList.add("active");
   newsMenu.classList.remove("active");
 });
-
 newsMenu.addEventListener("click", () => {
   photoSection.style.display = "none";
   newsSection.style.display = "block";
@@ -264,5 +209,4 @@ newsMenu.addEventListener("click", () => {
   loadNews();
 });
 
-// ---------------- Initialize ----------------
 loadGallery();

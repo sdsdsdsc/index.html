@@ -3,44 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alex's Photo Board</title>
+  <title>Alex's Creative Space</title>
   <link rel="stylesheet" href="style.css" />
-  <script type="module" src="script.js" defer></script>
 </head>
 <body>
-  <h1>📸 Alex's Photo Board</h1>
+  <h1>🌿 Alex's Creative Space</h1>
 
-  <!-- Top Menu -->
+  <!-- ======= MENU ======= -->
   <nav class="menu">
     <button id="photoMenu" class="active">📸 Photos</button>
     <button id="newsMenu">📰 News</button>
   </nav>
 
-  <!-- Photo Upload Section -->
-  <div id="photoSection">
-    <div class="upload-container">
+  <!-- ======= PHOTO SECTION ======= -->
+  <section id="photoSection">
+    <div class="upload-bar">
       <input type="file" id="fileInput" />
       <input type="text" id="nameInput" placeholder="Your name" />
       <input type="text" id="msgInput" placeholder="Leave a message" />
       <button id="uploadBtn">Upload</button>
     </div>
-
     <h2>Gallery</h2>
     <div id="gallery"></div>
-  </div>
+  </section>
 
-  <!-- News Section -->
-  <div id="newsSection" style="display: none;">
+  <!-- ======= NEWS SECTION ======= -->
+  <section id="newsSection" style="display:none;">
     <h2>News & Articles</h2>
     <div id="newsContainer"></div>
-  </div>
+  </section>
 
-  <!-- Modal -->
+  <!-- ======= MODAL (Photo Details) ======= -->
   <div id="postModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
       <div id="modalBody"></div>
     </div>
   </div>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
