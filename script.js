@@ -1,74 +1,64 @@
-// === Firebase Setup ===
-// Note: keep your existing Firebase config values here
+// === Firebase (ES Modules) ===
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
-  getDocs
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import {
   getStorage,
   ref,
   uploadBytes,
-  getDownloadURL
+  getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 
+/* ============================
+   🔧 TODO: paste your real keys
+   ============================ */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyBSlzsjq26_yFu7Hi1x6j8R4Yt7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
   projectId: "alex-photo-board",
-  storageBucket: "alex-photo-board.appspot.com",
-  messagingSenderId: "YOUR_ID",
-  appId: "YOUR_APP_ID",
+  storageBucket: "alex-photo-board.firebasestorage.app",
+  messagingSenderId: "1092938868533",
+  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// === Helpers ===
+// ---------- Helpers ----------
 function formatTimestamp(ts) {
-  // Accepts Firestore Timestamp object (with .seconds or .toDate),
-  // JS Date object, ISO string, or undefined.
   try {
     if (!ts) return "Unknown date";
-    // Firestore Timestamp (has seconds)
-    if (typeof ts === "object" && ts.seconds !== undefined) {
+    if (typeof ts === "object" && ts.seconds !== undefined)
       return new Date(ts.seconds * 1000).toLocaleString();
-    }
-    // Firestore Timestamp with toDate()
-    if (typeof ts === "object" && typeof ts.toDate === "function") {
+    if (typeof ts === "object" && typeof ts.toDate === "function")
       return ts.toDate().toLocaleString();
-    }
-    // JS Date
-    if (ts instanceof Date) {
-      return ts.toLocaleString();
-    }
-    // ISO string
+    if (ts instanceof Date) return ts.toLocaleString();
     if (typeof ts === "string") {
       const d = new Date(ts);
       if (!isNaN(d)) return d.toLocaleString();
     }
-  } catch (err) {
-    console.warn("formatTimestamp error:", err);
-  }
+  } catch {}
   return "Unknown date";
 }
 
-function safeText(val, fallback = "") {
-  if (val === undefined || val === null) return fallback;
-  return String(val);
+function safeText(v, fallback = "") {
+  if (v === undefined || v === null) return fallback;
+  return String(v);
 }
 
-// === DOM refs ===
+// ---------- DOM refs ----------
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 const userName = document.getElementById("userName");
 const messageInput = document.getElementById("messageInput");
 const gallery = document.getElementById("gallery");
 
-// === Upload Photo ===
+// ---------- Upload Photo ----------
 uploadBtn?.addEventListener("click", async () => {
   try {
     const file = fileInput.files[0];
@@ -86,7 +76,7 @@ uploadBtn?.addEventListener("click", async () => {
       message,
       imageUrl: url,
       likes: 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     fileInput.value = "";
@@ -99,7 +89,7 @@ uploadBtn?.addEventListener("click", async () => {
   }
 });
 
-// === Load Photos ===
+// ---------- Load Photos ----------
 async function loadPhotos() {
   try {
     if (!gallery) return;
@@ -113,7 +103,7 @@ async function loadPhotos() {
 
     snap.forEach((docSnap) => {
       const data = docSnap.data() || {};
-      const imgUrl = data.imageUrl || "";
+      const imgUrl = data.imageUrl || "https://placehold.co/400x250?text=No+Image";
       const name = safeText(data.name, "Anonymous");
       const message = safeText(data.message, "");
       const dateStr = formatTimestamp(data.timestamp);
@@ -121,7 +111,7 @@ async function loadPhotos() {
       const card = document.createElement("div");
       card.className = "photo-card";
       card.innerHTML = `
-        <img src="${imgUrl || 'https://via.placeholder.com/400x250?text=No+Image'}" alt="photo" />
+        <img src="${imgUrl}" alt="photo" />
         <p><strong>${name}</strong></p>
         <p>${message}</p>
         <small class="photo-date">${dateStr}</small>
@@ -131,18 +121,17 @@ async function loadPhotos() {
     });
   } catch (err) {
     console.error("loadPhotos error:", err);
-    // don't throw further — let the page continue
     gallery.innerHTML = "<p>Error loading gallery. Check console.</p>";
   }
 }
 
-// === Load News ===
+// ---------- Load News ----------
 async function loadNews() {
   try {
     const newsContainer = document.getElementById("newsContainer");
     if (!newsContainer) return;
-    newsContainer.innerHTML = "";
 
+    newsContainer.innerHTML = "";
     const snap = await getDocs(collection(db, "news"));
     if (snap.empty) {
       newsContainer.innerHTML = "<p>No news yet.</p>";
@@ -153,14 +142,13 @@ async function loadNews() {
       const data = docSnap.data() || {};
       const title = safeText(data.title, "Untitled");
       const summary = safeText(data.summary, "");
-      const img = data.imageUrl || "";
+      const img = data.imageUrl || "https://placehold.co/600x300?text=No+Image";
       const dateStr = formatTimestamp(data.timestamp);
 
       const card = document.createElement("div");
       card.className = "news-card";
-      // link to article page using the document id
       card.innerHTML = `
-        <img src="${img || 'https://via.placeholder.com/600x300?text=No+Image'}" alt="news" />
+        <img src="${img}" alt="news" />
         <h3><a href="article.html?id=${docSnap.id}" class="news-link">${title}</a></h3>
         <p>${summary}</p>
         <small>🕒 ${dateStr}</small>
@@ -174,6 +162,6 @@ async function loadNews() {
   }
 }
 
-// === Kick off loads (non-blocking) ===
-loadPhotos().catch(e => console.warn("loadPhotos catch:", e));
-loadNews().catch(e => console.warn("loadNews catch:", e));
+// ---------- Kick off (non-blocking) ----------
+loadPhotos().catch((e) => console.warn("loadPhotos catch:", e));
+loadNews().catch((e) => console.warn("loadNews catch:", e));

@@ -1,22 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Article | Alex's Creative Space</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
-<body class="article-page">
-  <div class="article-container">
-    <h1 id="title">Loading...</h1>
-    <p id="date" class="article-date"></p>
-    <img id="image" alt="Article image" class="article-image" />
-    <div id="content" class="article-body"></div>
-    <a href="index.html#newsSection" class="back-btn">← Back to News</a>
-  </div>
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "alex-photo-board.firebaseapp.com",
+  projectId: "alex-photo-board",
+  storageBucket: "alex-photo-board.appspot.com",
+  messagingSenderId: "YOUR_ID",
+  appId: "YOUR_APP_ID",
+};
 
-  <!-- ✅ Firebase script -->
-  <script type="module" src="article.js"></script>
-</body>
-</html>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function formatTimestamp(ts) {
+  try {
+    if (!ts) return "Unknown date";
+    if (typeof ts === "object" && ts.seconds !== undefined) return new Date(ts.seconds * 1000).toLocaleString();
+    if (typeof ts === "object" && typeof ts.toDate === "function") return ts.toDate().toLocaleString();
+    if (ts instanceof Date) return ts.toLocaleString();
+    if (typeof ts === "string") { const d = new Date(ts); if (!isNaN(d)) return d.toLocaleString(); }
+  } catch { /* ignore */ }
+  return "Unknown date";
+}
+
+const params = new URLSearchParams(location.search);
+const articleId = params.get("id");
+
+async function loadArticle() {
+  if (!articleId) { document.getElementById("content").textContent = "Missing article id."; return; }
+  const snap = await getDoc(doc(db, "news", articleId));
+  if (!snap.exists()) { document.getElementById("content").textContent = "Article not found."; return; }
+
+  const data = snap.data();
+  document.getElementById("title").textContent = data.title || "Untitled";
+  document.getElementById("date").textContent  = formatTimestamp(data.timestamp);
+  document.getElementById("image").src        = data.imageUrl || "https://placehold.co/1200x600?text=No+Image";
+  document.getElementById("content").innerHTML = data.content || "";
+}
+
+loadArticle().catch(err => {
+  console.error(err);
+  document.getElementById("content").textContent = "Error loading article.";
+});
