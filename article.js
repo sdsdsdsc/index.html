@@ -5,7 +5,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBSlzsjq26_yFu7Hi1x6j8R4Yt7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
   projectId: "alex-photo-board",
-  storageBucket: "alex-photo-board.firebasestorage.app",
+  storageBucket: "alex-photo-board.appspot.com",
   messagingSenderId: "1092938868533",
   appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c"
 };
