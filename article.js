@@ -2,12 +2,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/fireba
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyBSlzsjq26_yFu7Hi1x6j8R4Yt7uqpARDw",
   authDomain: "alex-photo-board.firebaseapp.com",
   projectId: "alex-photo-board",
-  storageBucket: "alex-photo-board.appspot.com",
-  messagingSenderId: "YOUR_ID",
-  appId: "YOUR_APP_ID",
+  storageBucket: "alex-photo-board.firebasestorage.app",
+  messagingSenderId: "1092938868533",
+  appId: "1:1092938868533:web:7df0a0832310c2d30d8e7c"
 };
 
 const app = initializeApp(firebaseConfig);
